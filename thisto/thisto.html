@@ -1,0 +1,36 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  // this 指向问题
+  function foo (params) {
+    console.log(this.a);
+  }
+  function fooStrict (params) {
+    'use strict'
+    console.log(this);
+    // console.log(this.a);
+  }
+  /*** 1 默认绑定 ***/
+  var a = 2;
+  // foo();           // 1 直接调用型，指向window，注意严格模式时，this指向 undefined   // 2
+  // fooStrict();     // 1 直接调用型，指向window，注意严格模式时，this指向 undefined   // 报错 a is noot definde
+ (function(){
+    'use strict';
+    // fooStrict();   //报错
+ })()
+
+ /*** 3 显示绑定 ***/
+ var obj = { a : '显示绑定'}
+foo.call('a'); //显示绑定
+</script>
+</html>

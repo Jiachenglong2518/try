@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <button id='d_btn'>防抖</button>
+  <button id='j_btn'>节流</button>
+</body>
+<script>  
+  // 防抖  清空  新建
+  function debounce (f,delay) {
+    let timer = null;
+    console.log(timer,'timer0');
+    return function(){      
+      const context = this;
+      const args = arguments;
+      console.log(context,'debounce');
+      var vm = this;
+      if (timer){
+        clearTimeout(timer);
+      }
+      console.log(timer,'timer debounce');
+      console.log(args, 'args debounce');
+      timer = setTimeout(()=>{
+        f.apply(context,args)
+      },delay)
+    }
+  }
+  // 节流
+  function throttle (f, wait) {
+    let timer;
+    return function (){
+      const context = this;
+      console.log(context,'throttle');
+      if (!timer){
+        console.log(timer,'timer throttle');
+        timer = setTimeout(()=>{
+          f();
+          timer = null;
+        }, wait)
+      }
+    }
+  }
+  function re (params) {
+    console.log('这是防抖');
+    console.log(params);
+    console.log(this,'防抖 this');
+  }
+  function je () {
+    console.log('这是节流');
+  }
+  let d_fn = debounce(re,500)
+  var d_btn = document.getElementById('d_btn');
+  var j_btn = document.getElementById('j_btn');
+  d_btn.onclick = d_fn;
+  // d_btn.onclick = debounce(re, 1000);
+  j_btn.onclick = throttle(je, 1000);
+
+</script>
+</html>

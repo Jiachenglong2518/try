@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- <div class="managingPatientSize">
+    <el-row>
+      <el-col :span="6">1</el-col>
+      <el-col :span="12">
+        <div id="china-map"></div>
+      </el-col>
+      <el-col :span="6">1</el-col>
+    </el-row>
+  </div> -->
+  <div id="china-map" style="width: 600px;height:400px;"></div>
+  <div id="main" style="width: 600px;height:400px;"></div>
+  
+</body>
+<!-- <script src="./echart.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@4/dist/echarts.min.js?_v_=1607268016278"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@4/map/js/china.js?_v_=1607268016278"></script>
+<!-- <script src='./china.js'></script> -->
+<script type="text/javascript">
+  function drawCharts () {
+    // 基于准备好的dom，初始化echarts实例
+    var chinaMap = echarts.init(document.getElementById("china-map"));
+    window.onresize = chinaMap.resize; // 窗口或框架被调整大小时执行chinaMap.resize
+    chinaMap.setOption({
+      // 进行相关配置
+      tooltip: {}, // 鼠标移到图里面的浮动提示框
+      dataRange: {
+        show: false,
+        min: 0,
+        max: 1000,
+        text: ["High", "Low"],
+        realtime: true,
+        calculable: true,
+        // color: ["orangered", "#FF9B52", "#FFD068",'pink','green'],
+      },
+      geo: {
+        // 这个是重点配置区
+        map: "china", // 表示中国地图
+        roam: true,
+        label: {  //地图的样式
+          normal: { 
+            show: true, // 是否显示对应地名
+            textStyle: {
+              color: "#000",
+            },
+          },
+        },
+        itemStyle: {  //区域的样式
+          normal: {
+            borderColor: "#fff",
+            borderWidth: "#333",
+            areaColor: "#a7a7a7",
+          },
+          emphasis: {
+            areaColor: null,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowBlur: 20,
+            borderWidth: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)",
+          },
+        },
+      },
+      series: [
+        // {
+        //   type: "scatter",
+        //   coordinateSystem: "geo", // 对应上方配置
+        // },
+        {
+          name: "", // 浮动框的标题
+          type: "map",
+          geoIndex: 0,
+          data: [
+            {
+              name: "北京",
+              value: 599,
+            },
+            {
+              name: "上海",
+              value: 142,
+            },
+            {
+              name: "哈尔滨",
+              value: 44,
+            },
+            {
+              name: "深圳",
+              value: 92,
+            },
+            {
+              name: "湖北",
+              value: 110,
+            },
+            {
+              name: "四川",
+              value: 453,
+            },
+          ],
+        },
+      ],
+    });
+  }
+ 
+  function one () {
+    console.log(1)
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: 'ECharts 入门示例'
+        },
+        tooltip: {},
+        legend: {
+            data:['销量']
+        },
+        xAxis: {
+            data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+        },
+        yAxis: {},
+        series: [{
+            name: '销量',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+        }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+  }
+  one()
+  drawCharts()
+</script>
+  
+<style lang="css" scoped>
+ 
+</style>
+</html>
+
+

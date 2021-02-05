@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #div1{
+      background: red;
+      width: 300px;
+      height: 300px;
+      text-align: right;
+    }
+    #div2{
+      background: yellow;
+      width: 200px;
+      height: 200px;
+      text-align: right;
+    }
+    #div3{
+      background: gray;
+      width: 100px;
+      height: 100px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+    <div id ='div1'>
+      div1
+      <div id="div2">
+        div2
+        <div id="div3">
+          div3
+        </div>
+      </div>
+    </div>
+  
+</body>
+<script>
+  var d1 = document.getElementById('div1')
+  var d2 = document.getElementById('div2')
+  var d3 = document.getElementById('div3')
+  d1.onclick = function(){
+    console.log('div1')
+  } 
+  d2.onclick = function(){
+    console.log('div2')
+  } 
+  d3.onclick = function(){
+    console.log('div3')
+  }
+  d3.onmousemove = function(event){
+    console.log(event.clientX);
+  } 
+</script>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无缝滚动</title>
+  <style> 
+    * {
+      margin:0;
+      padding:0;
+      list-style:none;
+      box-sizing:border-box;
+    }
+    #content {
+      width: 100vw;
+      overflow:hidden
+    }
+    #content ul {
+      overflow: hidden;
+      white-space: nowrap;
+      display: inline-block;
+      font-size: 0px;
+      /* transition: all  1s; */
+    }
+    #content ul li {
+      display: inline-block;
+      width:80vw;
+      height:300px;
+      font-size: 200px;
+      color: #fff;
+      padding: 0 3vw;
+      /* border: 1px solid red; */
+    }
+    #content ul li div{
+      color: #000;
+      border: 1px solid #999;
+      border-radius: 50px;
+      text-align: center;
+
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <ul>
+      <li>
+        <div class="card">3</div>
+      </li>
+      <li>
+        <div class="card">1</div>
+      </li>
+      <li>
+        <div class="card">2</div>
+      </li>
+      <li>
+        <div class="card">3</div>
+      </li>
+      <li>
+        <div class="card">1</div>
+      </li>
+    </ul>
+    <button id="l_btn">&lt;&lt;&lt;&lt;&lt;左滑</button>
+    <button id='r_btn'>右滑&gt;&gt;&gt;&gt;&gt;</button>
+  </div>
+  
+</body>
+<script>
+  window.onload = function() {
+    var content = document.getElementById("content")
+    var ul = content.getElementsByTagName("ul")[0];
+    var li = content.getElementsByTagName("li")[0];
+    var l_btn  = document.getElementById("l_btn");
+    var r_btn  = document.getElementById("r_btn");
+    var li_w = 80;
+    var p_w = 10;
+    var index = 1;
+    function play() {
+      console.log(index);
+      console.log(`${-1 * (li_w * index  - p_w ) }`);
+      var timer = setTimeout(()=>{
+        ul.style.transform = `translateX( ${-1 * (li_w * index  - p_w ) }vw)`;
+      })
+    }
+
+    play();
+
+    l_btn.onclick = function () {
+      index ++ ;
+      if(index == 4){
+        index = 1
+      }
+      console.log(index,'lb');
+      play();
+    }
+
+    r_btn.onclick = function () {
+      index -- ;
+      if(index < 0 || index == 0){
+        index = 3
+      }
+      play();
+    }
+
+
+  }
+
+
+</script>
+</html>

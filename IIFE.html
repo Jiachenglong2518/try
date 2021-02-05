@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<script>
+    var b = 10;
+    // IIFE 立即调用函数表达式
+    //非匿名自执行函数 函数名只读，不可更改
+    (function b(){
+        console.log(b);
+        b = 5;      //此动作为修改function b  ，为无效操作
+        console.log(window.b); // 10
+        var b = 20;  //此操作为声明一个新的变量b，为有效操作
+        console.log(b)
+    })();
+
+    var name = 'jcl_out';
+    (function (){
+        name = 'jcl_in';
+        console.log(name,'name in ');
+        console.log(window.name,'name'); // jcl_in
+    })()
+
+    /***  变量提升开始 >>>> ***/
+    var name = 'World!';
+    (function () {
+        if (typeof name === 'undefined') {
+            var name = 'Jack';
+            console.log('Goodbye ' + name);
+        } else {
+            console.log('Hello ' + name);
+        }
+    })();
+    //上述函数相当于
+    (function () {
+        var name;
+        if (typeof name === 'undefined') {
+            name = 'Jack';
+            console.log('Goodbye ' + name);
+        } else {
+            console.log('Hello ' + name);
+        }
+    })();
+    /***  开始 >>>> ***/
+    // 数组的原型是数组，对象的原型是对象，函数的原型是函数
+    Array.isArray( Array.prototype ); //true
+
+</script>
+</body>
+</html>
