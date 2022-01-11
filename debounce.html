@@ -10,7 +10,7 @@
   <button id='j_btn'>节流</button>
 </body>
 <script>  
-  // 防抖  清空  新建
+  // 防抖  清空  新建 执行时间内最后一个
   function debounce (f,delay) {
     let timer = null;
     console.log(timer,'timer0');
@@ -29,7 +29,7 @@
       },delay)
     }
   }
-  // 节流
+  // 节流 执行时间内最后一个
   function throttle (f, wait) {
     let timer;
     return function (){
