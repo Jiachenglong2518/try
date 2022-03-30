@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+<div style="margin:20px">
+  <input type="file" onchange="change(this)" style="width: 320px;" accept="*">
+  <pre><p style="font-family: sans-serif;"></p></pre>
+</body>
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+    var excelData;
+    function change(obj) {
+        if (!obj.files) {
+            return;
+        }
+        var file = obj.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var data = e.target.result;
+            excelData = XLSX.read(data, {
+                type: 'binary'
+            });
+            //excelData.SheetNames[0]是获取Sheets中第一个Sheet的名字
+            //excelData.Sheets[Sheet名]获取第一个Sheet的数据
+            var json = XLSX.utils.sheet_to_json(excelData.Sheets[excelData.SheetNames[0]]);
+            document.querySelector("p").innerHTML = JSON.stringify(json, null, "\t");
+        };
+        reader.readAsBinaryString(file);
+    }  
+</script>
+</html>
