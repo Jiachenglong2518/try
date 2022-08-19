@@ -29,7 +29,7 @@
       },delay)
     }
   }
-  // 节流 执行时间内最后一个
+  // 节流 执行完第一个后一段时间内不执行
   function throttle (f, wait) {
     let timer;
     return function (){

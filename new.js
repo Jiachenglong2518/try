@@ -38,3 +38,44 @@ function creat (fn,...args) {
   const res = fn.apply(obj, args)
   return res instanceof Object ? res : obj
 }
+
+
+// //显式>隐式
+// let obj = {
+//   name:'隐式',
+//   fn:function () {
+//       console.log(this.name);
+//   }
+// };
+// obj1 = {
+//   name:'显示'
+// };
+// obj.fn.call(obj1); // 显示
+
+
+//  new > 隐式
+// function foo (something) {
+//   this.a = something
+// }
+// var obj1 = {foo: foo}
+
+// obj1.foo(2)
+// console.log(obj1.a); // 2
+
+// var bar = new obj1.foo(4)
+// console.log(obj1.a); // 2
+// console.log(bar.a); // 4
+
+// new > 显示
+function foo (something) {
+  this.a = something
+}
+var obj1 = {}
+
+var bar = foo.bind(obj1)
+bar(2)
+console.log(obj1.a); // 2
+
+var baz = new bar(3)
+console.log(obj1.a); // 2
+console.log(baz.a); // 3
