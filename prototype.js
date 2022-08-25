@@ -1,21 +1,24 @@
 function Person(){
-  // this.name = 'person';
-  console.log(this.name)
+  this.name = "person"
 }
+Person.prototype.name = 'man'
 
-function person(){
-  // this.name = 'person';
-  console.log(this.name)
-}
-
-// Person.prototype.name = 'man'
 var name = "out person"
 
-function doo () {
-  var name = 'doo'
-  person()
-}
+var p1 = new Person()
 
+console.log(p1.__proto__ == Person.prototype); // true
+
+// Person.prototype 其本质为一个对象，故其__proto__ 指向Object.prototype
+console.log(Person.prototype.__proto__ == Object.prototype); //true
+console.log(Person.__proto__  == Function.prototype); // true
+
+console.log(Function.__proto__ );
+console.log(Object.__proto__ );
+console.log(Function.prototype.__proto__);
+console.log(Object.prototype.__proto__);
+
+console.log(p1.__proto__.constructor.__proto__ == Function.prototype); 
 
 // console.log(a.name); // person
 // console.log(a.__proto__); // Person.prototype
