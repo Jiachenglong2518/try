@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+
+<script>
+    var ws = new WebSocket(`ws://itcop.test.com:12080/serverForWebSocket/${1}/${2}`);
+                
+    ws.onopen = function()
+    {
+        // Web Socket 已连接上，使用 send() 方法发送数据
+        ws.send("发送数据");
+        console.log("数据发送中...");
+    };
+      
+    ws.onmessage = function (evt) 
+    { 
+        var received_msg = evt.data;
+        console.log(evt);
+        console.log( received_msg);
+        console.log(typeof received_msg);
+        console.log("数据已接收...");
+    };
+      
+    ws.onclose = function()
+    { 
+        // 关闭 websocket
+        console.log("连接已关闭..."); 
+    };
+</script>
+</html>
