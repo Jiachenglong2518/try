@@ -2,27 +2,21 @@
 // 深度克隆
 function clone (target, map = new Map) {
   debugger
-  if (typeof target == "object") {
-    let cloneTarget = Array.isArray(target) ? [] : {}
-    if (map.get(target)) {
-      console.log(1);
-      console.log(map.get(target),"map.get(target)");
-      return map.get(target)
-    }
-    map.set(target, cloneTarget)
-    console.log(cloneTarget, "cloneTarget");
-    for(const key in target){
-      console.log(3);
-      console.log(key);
-      cloneTarget[key] = clone(target[key], map)
-      console.log(clone(target[key], map));
-      console.log(cloneTarget[key]);
-    }
-    console.log(2);
-    return cloneTarget
-  } else {
-    return target
+  if (target === null || typeof target !== 'object') return target;
+  let cloneTarget = Array.isArray(target) ? [] : {}
+  // 解决循环引用
+  if (map.get(target)) {
+    console.log(1);
+    console.log(map.get(target),"map.get(target)");
+    return map.get(target)
   }
+  map.set(target, cloneTarget)
+  console.log(cloneTarget, "cloneTarget");
+  for(const key in target){
+    cloneTarget[key] = clone(target[key], map)
+  }
+  console.log(2);
+  return cloneTarget
 }
 var a = {
   a:1,
