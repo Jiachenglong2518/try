@@ -23,18 +23,18 @@ var obj = {
 }
 
 // obj.foo()()
-// obj.fna()
+obj.fna()
 
-const fn = obj.foo()
-fn()
+// const fn = obj.foo()
+// fn()
 
-const globalFn = () => {
-  console.log(this.a, 'globaFn');
-}
+// const globalFn = () => {
+//   console.log(this.a, 'globaFn');
+// }
 
-const globalFn1 = function () {
-  console.log(this.a, 'globalFn1');
-}
+// const globalFn1 = function () {
+//   console.log(this.a, 'globalFn1');
+// }
 
-globalFn()
-globalFn1()
+// globalFn()
+// globalFn1()

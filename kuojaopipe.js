@@ -29,17 +29,11 @@ var isValid = function(s) {
     console.log(map[item]);
     if(map[item] > 0){
       new_arr.push(map[item])
-    } else {
-      if(map[item] + new_arr[new_arr.length-1] == 0){
-          new_arr.pop();
-      }
+    } else if (map[item] + new_arr[new_arr.length-1] == 0){
+        new_arr.pop();
     }
     console.log(new_arr);
   })
-  if(new_arr.length > 0){
-      return false
-  } else {
-      return true
-  }
+ return new_arr.length > 0
 };
 isValid("(){}[]")

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>无限滚动 + 虚拟滚动 Demo</title>
+  <style>
+    #container {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      position: relative;
+    }
+    #list {
+      position: relative;
+    }
+    .item {
+      height: 40px;
+      line-height: 40px;
+      border-bottom: 1px solid #eee;
+      padding-left: 10px;
+      box-sizing: border-box;
+    }
+    #sentinel {
+      height: 1px;
+    }
+  </style>
+</head>
+<body>
+  <h2>无限滚动 + 虚拟滚动</h2>
+  <div id="container">
+    <div id="list"></div>
+    <div id="sentinel"></div>
+  </div>
+
+  <script>
+    const container = document.getElementById("container");
+    const list = document.getElementById("list");
+    const sentinel = document.getElementById("sentinel");
+
+    const itemHeight = 40; // 每个 item 高度
+    const buffer = 5; // 上下多渲染几个
+    let totalCount = 0; // 总数据量
+    let data = [];
+
+    // 初始加载
+    loadMore();
+
+    // 虚拟滚动渲染
+    container.addEventListener("scroll", render);
+
+    function render() {
+      const scrollTop = container.scrollTop;
+      console.log("scrollTop:", scrollTop);
+      const viewHeight = container.clientHeight;
+
+      const start = Math.floor(scrollTop / itemHeight) - buffer;
+      
+      console.log("start:", start);
+
+      const end = Math.ceil((scrollTop + viewHeight) / itemHeight) + buffer;
+
+      const visibleStart = Math.max(0, start);
+      const visibleEnd = Math.min(totalCount, end);
+
+      // 设置容器总高度（用 padding 占位）
+      list.style.height = totalCount * itemHeight + "px";
+
+      // 渲染可见部分
+      list.innerHTML = "";
+      for (let i = visibleStart; i < visibleEnd; i++) {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.textContent = data[i];
+        div.style.position = "absolute";
+        div.style.top = i * itemHeight + "px";
+        list.appendChild(div);
+      }
+    }
+
+    // 模拟加载更多数据
+    function loadMore() {
+      const newData = [];
+      for (let i = totalCount; i < totalCount + 50; i++) {
+        newData.push("Item " + i);
+      }
+      data = data.concat(newData);
+      totalCount = data.length;
+      render();
+    }
+
+    // IntersectionObserver 观察 sentinel，触发加载更多
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        console.log("加载更多...");
+        loadMore();
+      }
+    });
+    observer.observe(sentinel);
+  </script>
+</body>
+</html>
