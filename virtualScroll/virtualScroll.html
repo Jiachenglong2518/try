@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>虚拟滚动实现</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        padding: 20px;
+        background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+        color: white;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        opacity: 0.8;
+        font-size: 14px;
+      }
+
+      .controls {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eaeaea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stats {
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      .scroll-container {
+        height: 400px;
+        overflow-y: auto;
+        position: relative;
+        border-bottom: 1px solid #eaeaea;
+      }
+
+      .scroll-content {
+        position: relative;
+      }
+
+      .item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        position: absolute;
+        width: 100%;
+        transition: background-color 0.2s;
+      }
+
+      .item:hover {
+        background-color: #f8f9fa;
+      }
+
+      .item-index {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .item-content {
+        flex: 1;
+      }
+
+      .item-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #343a40;
+      }
+
+      .item-desc {
+        font-size: 13px;
+        color: #6c757d;
+      }
+
+      .footer {
+        padding: 15px 20px;
+        text-align: center;
+        color: #6c757d;
+        font-size: 13px;
+      }
+
+      .highlight {
+        background-color: #e3f2fd !important;
+      }
+
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 60px;
+        color: #6c757d;
+      }
+
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #4b6cb7;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      button {
+        background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: opacity 0.2s;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 120px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>虚拟滚动演示</h1>
+        <p>只渲染可见区域内容，高效处理大量数据</p>
+      </div>
+
+      <div class="controls">
+        <div class="stats">
+          总数据量: <span id="total-count">0</span> | 渲染项:
+          <span id="render-count">0</span> | 可见项:
+          <span id="visible-count">0</span>
+        </div>
+        <div>
+          <input
+            type="number"
+            id="data-size"
+            placeholder="数据量"
+            value="10000"
+            min="100"
+            max="100000"
+          />
+          <button id="generate-btn">生成数据</button>
+        </div>
+      </div>
+
+      <div class="scroll-container" id="scroll-container">
+        <div class="scroll-content" id="scroll-content"></div>
+      </div>
+
+      <div class="footer">
+        滚动区域高度: 400px | 每项高度: 60px | 缓冲区: 5项
+      </div>
+    </div>
+
+    <script>
+      class VirtualScroll {
+        constructor(container, content, options = {}) {
+          this.container = container;
+          this.content = content;
+          this.itemHeight = options.itemHeight || 60;
+          this.buffer = options.buffer || 5;
+          this.data = [];
+
+          this.visibleCount = 0;
+          this.startIndex = 0;
+          this.endIndex = 0;
+
+          this.init();
+        }
+
+        init() {
+          // 设置内容区域高度
+          this.content.style.height = `${this.data.length * this.itemHeight}px`;
+
+          // 绑定滚动事件
+          this.container.addEventListener(
+            "scroll",
+            this.handleScroll.bind(this)
+          );
+
+          // 初始渲染
+          this.renderVisibleItems();
+        }
+
+        setData(newData) {
+          this.data = newData;
+          this.content.style.height = `${this.data.length * this.itemHeight}px`;
+          this.renderVisibleItems();
+        }
+
+        handleScroll() {
+          this.renderVisibleItems();
+        }
+
+        renderVisibleItems() {
+          // 计算可见区域
+          const scrollTop = this.container.scrollTop;
+          const containerHeight = this.container.clientHeight;
+
+          // 计算开始和结束索引（包括缓冲区）
+          this.startIndex = Math.max(
+            0,
+            Math.floor(scrollTop / this.itemHeight) - this.buffer
+          );
+          this.endIndex = Math.min(
+            this.data.length - 1,
+            Math.ceil((scrollTop + containerHeight) / this.itemHeight) +
+              this.buffer
+          );
+
+          this.visibleCount = this.endIndex - this.startIndex + 1;
+
+          // 更新统计信息
+          document.getElementById("render-count").textContent =
+            this.visibleCount;
+          document.getElementById("visible-count").textContent = Math.ceil(
+            containerHeight / this.itemHeight
+          );
+
+          // 清空内容
+          this.content.innerHTML = "";
+
+          // 渲染可见项
+          for (let i = this.startIndex; i <= this.endIndex; i++) {
+            const item = this.createItem(this.data[i], i);
+            this.content.appendChild(item);
+          }
+        }
+
+        createItem(data, index) {
+          const item = document.createElement("div");
+          item.className = "item";
+          item.style.height = `${this.itemHeight}px`;
+          item.style.top = `${index * this.itemHeight}px`;
+
+          item.innerHTML = `
+                    <div class="item-index">${index + 1}</div>
+                    <div class="item-content">
+                        <div class="item-title">${data.title}</div>
+                        <div class="item-desc">${data.description}</div>
+                    </div>
+                `;
+
+          // 高亮当前项
+          if (
+            index ===
+            Math.floor(
+              (this.container.scrollTop + this.container.clientHeight / 2) /
+                this.itemHeight
+            )
+          ) {
+            item.classList.add("highlight");
+          }
+
+          return item;
+        }
+
+        // 滚动到指定位置
+        scrollTo(index) {
+          this.container.scrollTop = index * this.itemHeight;
+        }
+      }
+
+      // 生成模拟数据
+      function generateData(count) {
+        const titles = [
+          "项目计划文档",
+          "季度财务报告",
+          "产品需求文档",
+          "技术设计方案",
+          "市场分析报告",
+          "用户调研总结",
+          "项目进度更新",
+          "团队周报",
+          "客户反馈汇总",
+          "产品路线图",
+        ];
+
+        const descriptions = [
+          "这是一份重要的文档，包含了详细的信息和数据。",
+          "总结了过去一段时间的工作成果和遇到的问题。",
+          "记录了关键决策过程和最终确定的方向。",
+          "包含了多个部门的协作内容和时间安排。",
+          "提供了详细的数据分析和可视化图表。",
+        ];
+
+        const data = [];
+        for (let i = 0; i < count; i++) {
+          data.push({
+            title: `${titles[i % titles.length]} #${i + 1}`,
+            description: descriptions[i % descriptions.length],
+          });
+        }
+
+        return data;
+      }
+
+      // 初始化
+      document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById("scroll-container");
+        const content = document.getElementById("scroll-content");
+        const generateBtn = document.getElementById("generate-btn");
+        const dataSizeInput = document.getElementById("data-size");
+        const totalCountEl = document.getElementById("total-count");
+
+        // 创建虚拟滚动实例
+        const virtualScroll = new VirtualScroll(container, content, {
+          itemHeight: 60,
+          buffer: 5,
+        });
+
+        // 初始生成数据
+        function generateNewData() {
+          const dataSize = parseInt(dataSizeInput.value) || 10000;
+          if (dataSize < 100) {
+            alert("数据量不能少于100");
+            return;
+          }
+
+          if (dataSize > 100000) {
+            alert("数据量不能超过100000");
+            return;
+          }
+
+          // 显示加载状态
+          content.innerHTML =
+            '<div class="loading"><div class="spinner"></div>生成数据中...</div>';
+
+          // 使用setTimeout模拟数据生成延迟
+          setTimeout(() => {
+            const data = generateData(dataSize);
+            virtualScroll.setData(data);
+            totalCountEl.textContent = dataSize.toLocaleString();
+          }, 100);
+        }
+
+        // 绑定生成按钮事件
+        generateBtn.addEventListener("click", generateNewData);
+
+        // 初始生成数据
+        generateNewData();
+
+        // 添加键盘快捷键
+        document.addEventListener("keydown", function (e) {
+          if (e.ctrlKey && e.key === "r") {
+            e.preventDefault();
+            generateNewData();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>虚拟滚动（可变高度）</title>
+<style>
+  body { margin: 0; padding: 0; font-family: sans-serif; }
+  #container {
+    width: 400px;
+    height: 500px;              /* 可视区域高度 */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    position: relative;
+  }
+  .item {
+    box-sizing: border-box;
+    width: 100%;
+    border-bottom: 1px solid #eee;
+    background: #fafafa;
+    padding: 10px;
+  }
+</style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <script>
+/** ============================
+ * 虚拟滚动（子项高度不固定）
+ * ============================ */
+
+/**
+ * @param {HTMLElement} container - 滚动容器
+ * @param {Array} data - 数据列表
+ * @param {Function} renderItem - 渲染函数 (item, index) => HTMLElement
+ * @param {Object} options
+ * @param {number} [options.estimatedItemHeight=50] - 预估每项高度
+ * @param {number} [options.buffer=5] - 缓冲区项数
+ */
+function createVirtualList(container, data, renderItem, options = {}) {
+  const estimatedItemHeight = options.estimatedItemHeight || 50;
+  const buffer = options.buffer || 5;
+
+  const n = data.length;
+
+  // =============== DOM 结构 ===============
+  // 使用三个元素：
+  // topSpacer: 顶部占位
+  // visibleWrapper: 存放可视范围内的真实项
+  // bottomSpacer: 底部占位
+  const topSpacer = document.createElement('div');
+  const visibleWrapper = document.createElement('div');
+  const bottomSpacer = document.createElement('div');
+
+  container.appendChild(topSpacer);
+  container.appendChild(visibleWrapper);
+  container.appendChild(bottomSpacer);
+
+  // =============== 数据结构 ===============
+  const heights = new Array(n).fill(0); // 每项真实高度
+  const prefix = new Array(n + 1).fill(0); // 前缀和 prefix[i] = sum(heights[0..i-1])
+  let totalHeight = 0;
+
+  // =============== 初始化前缀和（用估算值） ===============
+  function rebuildPrefix() {
+    prefix[0] = 0;
+    for (let i = 0; i < n; i++) {
+      prefix[i + 1] = prefix[i] + (heights[i] || estimatedItemHeight);
+    }
+    totalHeight = prefix[n];
+  }
+  rebuildPrefix();
+
+  // =============== 工具函数：二分查找滚动位置对应的索引 ===============
+  function findIndexByScroll(scrollTop) {
+    let low = 0, high = n - 1;
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      if (prefix[mid + 1] <= scrollTop) low = mid + 1;
+      else high = mid;
+    }
+    return low;
+  }
+
+  // =============== 渲染逻辑 ===============
+  let startIndex = 0;
+  let endIndex = 0;
+  let itemElements = new Map(); // index -> element
+
+  const resizeObserver = new ResizeObserver(entries => {
+    let changed = false;
+    for (const e of entries) {
+      const el = e.target;
+      const index = Number(el.dataset.index);
+      if (!isNaN(index)) {
+        const h = el.offsetHeight;
+        if (heights[index] !== h) {
+          heights[index] = h;
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      rebuildPrefix();
+      updateVisible();
+    }
+  });
+
+  function unobserveAll() {
+    itemElements.forEach(el => resizeObserver.unobserve(el));
+    itemElements.clear();
+  }
+
+  function updateVisible() {
+    const scrollTop = container.scrollTop;
+    const viewHeight = container.clientHeight;
+
+    // 二分查找可视区起始索引
+    startIndex = findIndexByScroll(scrollTop);
+    // 预估可视范围
+    const estVisibleCount = Math.ceil(viewHeight / estimatedItemHeight);
+    endIndex = Math.min(
+      n - 1,
+      startIndex + estVisibleCount + buffer * 2
+    );
+
+    const start = Math.max(0, startIndex - buffer);
+
+    // 计算上、下占位高度
+    const topHeight = prefix[start] || 0;
+    const bottomHeight = Math.max(0, totalHeight - (prefix[endIndex + 1] || 0));
+
+    // 更新 spacer 高度
+    topSpacer.style.height = topHeight + 'px';
+    bottomSpacer.style.height = bottomHeight + 'px';
+
+    // 清空旧元素
+    unobserveAll();
+    visibleWrapper.innerHTML = '';
+
+    // 重新渲染当前可视区域项
+    for (let i = start; i <= endIndex; i++) {
+      const item = data[i];
+      const el = renderItem(item, i);
+      el.classList.add('item');
+      el.dataset.index = i;
+      visibleWrapper.appendChild(el);
+      itemElements.set(i, el);
+      resizeObserver.observe(el);
+    }
+  }
+
+  // =============== 事件绑定 ===============
+  container.addEventListener('scroll', () => {
+    updateVisible();
+  });
+
+  // 初次渲染
+  updateVisible();
+
+  return {
+    update() {
+      rebuildPrefix();
+      updateVisible();
+    },
+    scrollTo(index) {
+      const y = prefix[index] || 0;
+      container.scrollTop = y;
+      updateVisible();
+    }
+  };
+}
+
+  /** ========== 示例使用 ========== **/
+  // 生成 1000 条假数据
+  const data = Array.from({ length: 1000 }, (_, i) => ({
+    id: i + 1,
+    text: `第 ${i + 1} 条数据 - 内容随机长度: ` + '⭐️'.repeat(Math.floor(Math.random() * 50))
+  }));
+
+  const container = document.getElementById('container');
+
+  // 创建虚拟列表
+  const vlist = createVirtualList(
+    container,
+    data,
+    (item, i) => {
+      const el = document.createElement('div');
+      el.innerHTML = `<b>${item.text}</b>`;
+      return el;
+    },
+    { estimatedItemHeight: 40, buffer: 5 }
+  );
+  </script>
+</body>
+</html>
