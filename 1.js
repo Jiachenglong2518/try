@@ -1,28 +1,28 @@
-// class EventBus {
-//   constructor () {
-//     this.a = '1'
-//     this.events = {}
-//   }
+class EventBus {
+  constructor () {
+    this.a = '1'
+    this.events = {}
+  }
 
-//   on (eventName, cb) {
-//     if (!this.events[eventName]) {
-//       this.events[eventName] = []
-//     }
-//     this.events[eventName].push(cb)
-//   }
+  on (eventName, cb) {
+    if (!this.events[eventName]) {
+      this.events[eventName] = []
+    }
+    this.events[eventName].push(cb)
+  }
 
-//   off (eventName, cb) {
-//     if (!this.events[eventName]) {
-//       return
-//     }
-//     this.events[eventName] = this.events[eventName].filter(item => item !== cb)
-//   }
+  off (eventName, cb) {
+    if (!this.events[eventName]) {
+      return
+    }
+    this.events[eventName] = this.events[eventName].filter(item => item !== cb)
+  }
 
-//   emit (eventName, data) {
-//     if (!this.events[eventName]) return
-//     this.events[eventName].forEach(cb => cb(data))
-//   }
-// }
+  emit (eventName, data) {
+    if (!this.events[eventName]) return
+    this.events[eventName].forEach(cb => cb(data))
+  }
+}
 
 // 最长回文子串
 // abcba abba
